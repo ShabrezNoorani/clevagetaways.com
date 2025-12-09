@@ -1,379 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rate ClevaGateways</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* --- PREMIUM MOBILE CSS --- */
-        :root {
-            --primary-color: #333;
-            --secondary-color: #666;
-            --tripadvisor-green: #00AA6C;
-            --google-blue: #4285F4;
-            --gold-star: #FFD700;
-            --bg-gradient: linear-gradient(135deg, #f6f8fb 0%, #eef2f7 100%);
-        }
+<style>
+  /* 1. Container Layout */
+  #review-widget { 
+    max-width: 600px; 
+    margin: 0 auto; 
+    text-align: center; 
+    font-family: 'Montserrat', sans-serif; 
+    padding: 15px; /* Slightly reduced padding */
+  }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: var(--bg-gradient);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            color: var(--primary-color);
-        }
+  /* 2. Star Styling - The "No-Wrap" Guarantee */
+  .star-rating { 
+    display: flex;             /* Uses flexible layout */
+    justify-content: center;   /* Centers the stars */
+    flex-wrap: nowrap;         /* FORCES single line */
+    gap: 2px;                  /* Tiny space between stars */
+    margin: 20px 0; 
+  }
+  
+  .star { 
+    /* Responsive Size: Stars take up 15% of screen width on mobile, 
+       but never get bigger than 60px on desktop */
+    font-size: clamp(40px, 13vw, 65px); 
+    color: #e0e0e0; 
+    cursor: pointer; 
+    line-height: 1; 
+    transition: color 0.2s; 
+  }
+  
+  .star:hover, .star.selected { color: #FFD700; } 
 
-        .container {
-            background: white;
-            padding: 35px 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px -10px rgba(50, 50, 93, 0.25), 0 5px 15px -10px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 450px;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
+  /* 3. The Hidden Form Section */
+  #feedback-form-section {
+    display: none; 
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: left; 
+  }
+  
+  #feedback-form-section h3 { 
+    margin-top: 0; 
+    color: #333; 
+    text-align: center;
+  }
+</style>
 
-        /* Logo and Header Area */
-        .logo-area img {
-            max-height: 80px;
-            width: auto;
-            margin-bottom: 15px;
-        }
+<div id="review-widget">
 
-        .seasonal-greeting {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            min-height: 1.4em;
-        }
-
-        h1 { font-weight: 700; font-size: 1.8rem; margin: 10px 0; }
-        h2 { font-weight: 600; font-size: 1.4rem; }
-
-        .empathy-text {
-            color: var(--secondary-color);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 25px;
-            padding: 0 10px;
-        }
-
-        /* Star Rating Styling */
-        .stars {
-            font-size: 50px;
-            cursor: pointer;
-            color: #e0e0e0;
-            margin: 25px 0;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .stars span {
-            transition: color 0.2s, transform 0.1s;
-            display: inline-block;
-        }
-
-        .stars span:hover, .stars span.active {
-            color: var(--gold-star);
-            transform: scale(1.1);
-        }
-
-        /* Sections & Animation */
-        .hidden { display: none; }
-        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- FORM STYLING --- */
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 15px;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: none;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        textarea:focus { border-color: var(--primary-color); }
-
-        .btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-submit { background-color: var(--primary-color); color: white; }
-        .btn-submit:disabled { background-color: #999; cursor: not-allowed; }
-
-        /* Loading Spinner */
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid white;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-            display: none;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-
-        /* --- IMAGE CARD LINKS --- */
-        .links-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .review-card {
-            display: flex;
-            align-items: center;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            text-decoration: none;
-            color: var(--primary-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            border: 1px solid #eee;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-align: left;
-        }
-
-        .review-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background-color: #fafafa;
-        }
-        
-        /* Special styling for Google card */
-        .review-card.google-card {
-            background-color: #f8fbff;
-            border-color: #dceeff;
-        }
-
-        .card-image-wrapper {
-            width: 90px;
-            height: 70px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f0f0f0;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .review-card img {
-            height: 100%; 
-            width: auto;
-        }
-        
-        .google-card .card-image-wrapper img {
-            height: auto;
-            width: 60%;
-        }
-
-        .card-text {
-            padding: 0 15px;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-    </style>
-</head>
-<body>
-
-    <div class="container fade-in">
-        
-        <div class="logo-area">
-            <img src="assets/img/cleva logo.webp" alt="ClevaGateways Logo" onerror="this.style.display='none'">
-        </div>
-        <div id="seasonal-greeting" class="seasonal-greeting"></div>
-
-
-        <div id="rating-screen">
-            <h1>How was your experience?</h1>
-            <p class="empathy-text">
-                Our guides are hard-working students in Paris. Leaving a quick review helps them win internal contests and supports their studies. It means the world to them!
-            </p>
-            <div class="stars" id="star-container">
-                <span data-value="1">&#9733;</span>
-                <span data-value="2">&#9733;</span>
-                <span data-value="3">&#9733;</span>
-                <span data-value="4">&#9733;</span>
-                <span data-value="5">&#9733;</span>
-            </div>
-        </div>
-
-
-        <div id="feedback-screen" class="hidden">
-            <h2>We're sorry to hear that.</h2>
-            <p class="empathy-text">Please tell us how we can do better next time.</p>
-            
-            <form id="internal-form">
-                <textarea id="feedback-text" placeholder="Write your feedback here..." required></textarea>
-                <button type="submit" class="btn btn-submit" id="submit-btn">
-                    <div class="spinner" id="spinner"></div>
-                    <span id="btn-text">Send Feedback</span>
-                </button>
-            </form>
-        </div>
-
-
-        <div id="thank-you-screen" class="hidden">
-            <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
-            <h2>Feedback Received</h2>
-            <p class="empathy-text" style="margin-top: 20px;">
-                Your feedback has been securely submitted to our internal quality team. We appreciate your honesty and will use this to improve.
-            </p>
-        </div>
-
-
-        <div id="review-links-screen" class="hidden">
-            <h2>Awesome! 🎉</h2>
-            <p class="empathy-text">Please click your tour below to leave a public review. It takes less than a minute!</p>
-            
-            <div class="links-container">
-                <a href="https://search.google.com/local/writereview" target="_blank" class="review-card google-card">
-                    <div class="card-image-wrapper">
-                        <img src="assets/img/google.png" alt="Google">
-                    </div>
-                    <span class="card-text">Google Review</span>
-                </a>
-
-                <a href="https://www.tripadvisor.com/UserReviewEdit-g187147-d33370481-Notre_Dame_Cathedral_Outdoor_Tour_with_optional_Sainte_Chapelle-Paris_Ile_de_France.html" target="_blank" class="review-card">
-                    <div class="card-image-wrapper">
-                        <img src="assets/img/nd.jpg" alt="Notre Dame">
-                    </div>
-                    <span class="card-text">Notre Dame Outdoor Tour</span>
-                </a>
-
-                <a href="https://www.tripadvisor.com/UserReviewEdit-g187147-d33409650-Montmartre_and_Sacre_Coeur_Tour-Paris_Ile_de_France.html" target="_blank" class="review-card">
-                    <div class="card-image-wrapper">
-                        <img src="assets/img/montmartre.jpg" alt="Montmartre">
-                    </div>
-                    <span class="card-text">Montmartre & Sacré-Cœur</span>
-                </a>
-
-                <a href="https://www.tripadvisor.com/UserReviewEdit-g187147-d33674730-Eiffel_Tower_Climbing_Tour-Paris_Ile_de_France.html" target="_blank" class="review-card">
-                    <div class="card-image-wrapper">
-                        <img src="assets/img/eiffel.jpg" alt="Eiffel Tower">
-                    </div>
-                    <span class="card-text">Eiffel Tower Climbing</span>
-                </a>
-            </div>
-        </div>
-
+  <div id="stars-section">
+    <h3>How was your tour today?</h3>
+    
+    <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d1e7fd;">
+      <p style="color:#333; margin: 0; font-size: 15px; line-height: 1.5;">
+        <strong>Support your guide!</strong> 🎓<br>
+        Many of our guides are students working hard to fund their studies. Your 5-star review helps them win our <strong>"Guide of the Month"</strong> award and bonuses!
+      </p>
     </div>
+    
+    <div class="star-rating">
+      <span class="star" onclick="handleRate(1)">★</span>
+      <span class="star" onclick="handleRate(2)">★</span>
+      <span class="star" onclick="handleRate(3)">★</span>
+      <span class="star" onclick="handleRate(4)">★</span>
+      <span class="star" onclick="handleRate(5)">★</span>
+    </div>
+    <p style="color:#666; font-size: 14px;">Tap a star to rate.</p>
+  </div>
 
-    <script>
-        // --- Seasonal Greeting Logic ---
-        function setSeasonalGreeting() {
-            const greetingEl = document.getElementById('seasonal-greeting');
-            const now = new Date();
-            const currentMonth = now.getMonth(); // 0=Jan, 11=Dec
-            const currentDate = now.getDate();
+  <div id="feedback-form-section">
+    <h3>We are sorry to hear that.</h3>
+    <p style="text-align:center; margin-bottom:20px;">Please tell us what went wrong so we can fix it.</p>
+    
+    [contact-form-7 id="3a6bdd2" title="Review Feedback Form"]
 
-            if (currentMonth === 11 && currentDate <= 25) {
-                greetingEl.innerText = "🎄 Merry Christmas! 🎄";
-                greetingEl.style.color = "#D42426";
-            } 
-            else if ((currentMonth === 11 && currentDate > 25) || (currentMonth === 0 && currentDate <= 7)) {
-                greetingEl.innerText = "✨ Happy New Year! ✨";
-                greetingEl.style.color = "#333";
-            } else {
-                greetingEl.style.display = 'none';
-            }
-        }
-        setSeasonalGreeting();
+  </div>
 
-        // --- Star Rating Logic ---
-        const stars = document.querySelectorAll('.stars span');
-        const ratingScreen = document.getElementById('rating-screen');
-        const feedbackScreen = document.getElementById('feedback-screen');
-        const reviewLinksScreen = document.getElementById('review-links-screen');
-        const thankYouScreen = document.getElementById('thank-you-screen');
+</div>
 
-        stars.forEach(star => {
-            star.addEventListener('click', function() {
-                const value = parseInt(this.getAttribute('data-value'));
-                highlightStars(value);
-                setTimeout(() => handleRatingLogic(value), 300);
-            });
-        });
+<script>
+  function handleRate(stars) {
+    // 1. Highlight Stars
+    var allStars = document.querySelectorAll('.star');
+    allStars.forEach(function(s, index) {
+      if (index < stars) s.classList.add('selected');
+      else s.classList.remove('selected');
+    });
 
-        function highlightStars(value) {
-            stars.forEach(star => {
-                 const starVal = parseInt(star.getAttribute('data-value'));
-                 star.classList.toggle('active', starVal <= value);
-            });
-        }
-
-        function handleRatingLogic(value) {
-            ratingScreen.classList.add('hidden');
-            if (value <= 3) {
-                feedbackScreen.classList.remove('hidden');
-                feedbackScreen.classList.add('fade-in');
-            } else {
-                reviewLinksScreen.classList.remove('hidden');
-                reviewLinksScreen.classList.add('fade-in');
-            }
-        }
-
-        // --- Convincing Form Submit Logic ---
-        const internalForm = document.getElementById('internal-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const spinner = document.getElementById('spinner');
-        const btnText = document.getElementById('btn-text');
-        const feedbackText = document.getElementById('feedback-text');
-
-        internalForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // 1. Change UI to "sending" state
-            submitBtn.disabled = true;
-            spinner.style.display = 'inline-block';
-            btnText.innerText = "Sending...";
-            feedbackText.disabled = true;
-
-            // 2. Simulate network delay (1.5 seconds)
-            setTimeout(() => {
-                feedbackScreen.classList.add('hidden');
-                thankYouScreen.classList.remove('hidden');
-                thankYouScreen.classList.add('fade-in');
-                // Reset form state
-                submitBtn.disabled = false;
-                spinner.style.display = 'none';
-                btnText.innerText = "Send Feedback";
-                feedbackText.value = "";
-                feedbackText.disabled = false;
-            }, 1500);
-        });
-
-    </script>
-</body>
-</html>
+    // 2. Logic
+    setTimeout(function() {
+      if (stars >= 4) {
+        // Redirect to TripAdvisor (4 or 5 stars)
+        window.location.href = "https://www.tripadvisor.com/UserReviewEdit-g187147-d34037195-Eiffel_Tower_Dedicated_Reserved_Access_Top_or_2nd_floor_by_stairs-Paris_Ile_de_France.html";
+      } else {
+        // Show Form (1, 2, or 3 stars)
+        document.getElementById('stars-section').style.display = 'none';
+        document.getElementById('feedback-form-section').style.display = 'block';
+      }
+    }, 400);
+  }
+</script>
